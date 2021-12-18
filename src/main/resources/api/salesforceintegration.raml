@@ -1,0 +1,293 @@
+#%RAML 1.0
+title: salesforceIntegration
+
+uses:
+  common: /Common/traits/commonBusinesslibrary.raml
+
+/addEmployeeAndAddress:
+  get:
+    is:
+      - common.transactionId
+      - common.Accept
+      - common.language
+            
+    body:
+      application/json:
+        properties:
+          Identification:
+            type: object
+            properties:
+              FirstName:
+                type: string
+                example: "BOb"
+              LastName:
+                type: string
+                example: "Frederick"
+              DOB:
+                type: string
+                example: "06/21/1980"
+              Gender:
+                type: string
+                example: "Male"
+              Title:
+                type: string
+                example: "Manager"
+          email:
+            type: string
+            example: "srinivasanselvaraj363@gmail.com"
+          Address:
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: "home"
+                  number:
+                    type: integer
+                    example: 1234
+                  street:
+                    type: string
+                    example: "pimple saudagar"
+                  Unit:
+                    type: string
+                    example: "1a"
+                  City:
+                    type: string
+                    example: "Somewhere"
+                  State:
+                    type: string
+                    example: "WV"
+                  zipcode:
+                    type: string
+                    example: "12345"
+          
+        
+    responses:
+      200:
+        body:
+          application/json:
+            type: !include Common/dataType/Responses.raml
+
+/Address:
+   get:
+    is:
+      - common.transactionId
+      - common.Accept 
+      - common.language
+      - common.accountNumber
+    body:
+      application/json:
+        properties:
+          Identification:
+            type: object
+            properties:
+              FirstName:
+                type: string
+                example: "BOb"
+              LastName:
+                type: string
+                example: "Frederick"
+              DOB:
+                type: string
+                example: "06/21/1980"
+              Gender:
+                type: string
+                example: "Male"
+              Title:
+                type: string
+                example: "Manager"
+          email:
+            type: string
+            example: "srinivasanselvaraj363@gmail.com"
+          Address:
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: "home"
+                  number:
+                    type: integer
+                    example: 1234
+                  street:
+                    type: string
+                    example: "pimple saudagar"
+                  Unit:
+                    type: string
+                    example: "1a"
+                  City:
+                    type: string
+                    example: "Somewhere"
+                  State:
+                    type: string
+                    example: "WV"
+                  zipcode:
+                    type: string
+                    example: "12345"
+    responses:
+      200:
+        body:
+          application/json:
+            type: !include Common/dataType/Responses.raml
+
+/deleteEmployee:
+  get:
+    is:
+      - common.transactionId
+      - common.Accept 
+      - common.language
+      - common.accountNumber
+    
+    body:
+      application/json:
+        properties:
+          Identification:
+            type: object
+            properties:
+              FirstName:
+                type: string
+                example: "BOb"
+              LastName:
+                type: string
+                example: "Frederick"
+              DOB:
+                type: string
+                example: "06/21/1980"
+              Gender:
+                type: string
+                example: "Male"
+              Title:
+                type: string
+                example: "Manager"
+          email:
+            type: string
+            example: "srinivasanselvaraj363@gmail.com"
+          Address:
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: "home"
+                  number:
+                    type: integer
+                    example: 1234
+                  street:
+                    type: string
+                    example: "pimple saudagar"
+                  Unit:
+                    type: string
+                    example: "1a"
+                  City:
+                    type: string
+                    example: "Somewhere"
+                  State:
+                    type: string
+                    example: "WV"
+                  zipcode:
+                    type: string
+                    example: "12345"
+    responses:
+      200:
+        body:
+          application/json:
+            type: !include Common/dataType/Responses.raml
+
+/updateDataOfEmployeeAndAddress:
+  get:
+    is:
+      - common.transactionId
+      - common.Accept 
+      - common.language
+      - common.accountNumber
+  
+    body:
+      application/json:
+        properties:
+          Identification:
+            type: object
+            properties:
+              FirstName:
+                type: string
+                example: "BOb"
+              LastName:
+                type: string
+                example: "Frederick"
+              DOB:
+                type: string
+                example: "06/21/1980"
+              Gender:
+                type: string
+                example: "Male"
+              Title:
+                type: string
+                example: "Manager"
+          email:
+            type: string
+            example: "srinivasanselvaraj363@gmail.com"
+          Address:
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: "home"
+                  number:
+                    type: integer
+                    example: 1234
+                  street:
+                    type: string
+                    example: "pimple saudagar"
+                  Unit:
+                    type: string
+                    example: "1a"
+                  City:
+                    type: string
+                    example: "Somewhere"
+                  State:
+                    type: string
+                    example: "WV"
+                  zipcode:
+                    type: string
+                    example: "12345"
+    responses:
+      200:
+        body:
+          application/json:
+            type: !include Common/dataType/Responses.raml
+                  
+                    
+
+            
+              
+                
+                           
+            
+            
+              
+              
+
+              
+          
+              
+
+            
+               
+                
+
+
+           
+            
+            
+            
+        
+
+
+        
+          
+          
+      
+      
+          
+       
+          

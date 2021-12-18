@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="salesforceintegration-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="salesforceintegration-config" api="salesforceintegration.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="66c42663-d429-4115-aebc-88d7d3de8ca5" >
+		<salesforce:basic-connection username="nadeemshaikh4775@concentrix.com" password="Nightfury@741852" securityToken="PE9E5IZbRCWrGZA0CDfVHcds" url="https://login.salesforce.com/services/Soap/u/52.0" />
+	</salesforce:sfdc-config>
+	<flow name="salesforceintegration-main">
+        <http:listener config-ref="salesforceintegration-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="salesforceintegration-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="salesforceintegration-console">
+        <http:listener config-ref="salesforceintegration-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="salesforceintegration-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\Address:application\json:salesforceintegration-config">
+        <logger level="INFO" message="get:\Address:application\json:salesforceintegration-config" />
+		<set-variable value="#[attributes.queryParams.accountNumber]" doc:name="accountNumber" doc:id="f3931d34-d33d-4530-9465-a4d62a78c4d6" variableName="accountNumber"/>
+		<set-variable value="#[payload]" doc:name="payload" doc:id="9de2325e-91d9-4d0e-9d84-4a7f14d14e5a" variableName="payload"/>
+		<salesforce:query doc:name="Query" doc:id="c9a39987-374f-4285-a2ca-ea7badda2382" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id from Account where AccountNumber=':accountNumber']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"" : "",
+	"accountNumber" : vars.accountNumber
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="412bff60-accb-4422-bf93-1d474632b7de">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[
+	{
+		Id: payload[0].Id,
+ "BillingCity": vars.payload.Address.City[0],
+ "ShippingCity": vars.payload.Address.City[0],
+ "BillingState": vars.payload.Address.State[0],
+ "ShippingState": vars.payload.Address.State[0],
+ "BillingStreet": vars.payload.Address.street[0],
+ "ShippingStreet": vars.payload.Address.street[0],
+ "BillingPostalCode": vars.payload.Address.zipcode[0],
+ "ShippingPostalCode": vars.payload.Address.zipcode[0]
+
+	}
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:update doc:name="Update" doc:id="ecb41936-c5a9-48cf-a626-fda4d6b181e9" config-ref="Salesforce_Config" type="Account"/>
+		<ee:transform doc:name="Transform Message" doc:id="b6cf4102-b498-4a38-aea4-0da7b76911d4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "msg": "successful operation",
+  "code": 200,
+  "success": payload.items[0].payload.success ,
+  "eventId": payload.items[0].payload.id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+	<flow name="get:\addEmployeeAndAddress:application\json:salesforceintegration-config">
+        <logger level="INFO" message="get:\addEmployeeAndAddress:application\json:salesforceintegration-config" />
+		<ee:transform doc:name="Transform Message" doc:id="45ef5dea-9bd0-4053-8d9b-7202139825ca" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[payload] map {
+	"AccountNumber" : attributes.queryParams.accountNumber,
+ "Name" : $.Identification.FirstName ++ " " ++ $.Identification.LastName,
+ "BillingCity": $.Address.City[0],
+ "ShippingCity": $.Address.City[0],
+ "BillingState": $.Address.State[0],
+ "ShippingState": $.Address.State[0],
+ "BillingStreet": $.Address.street[0],
+ "ShippingStreet": $.Address.street[0],
+ "BillingPostalCode": $.Address.zipcode[0],
+ "ShippingPostalCode": $.Address.zipcode[0]
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:name="Create" doc:id="8d08eefd-7dde-471e-87d9-4b7d8f4c6bb7" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="4998846b-c0cd-4a86-82e9-b98728570396" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "msg": "successful operation",
+  "code": 200,
+  "success": payload.items[0].payload.success ,
+  "eventId": payload.items[0].payload.id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+	<flow name="get:\deleteEmployee:application\json:salesforceintegration-config">
+        <logger level="INFO" message="get:\deleteEmployee:application\json:salesforceintegration-config" />
+		<set-variable value="#[attributes.queryParams.accountNumber]" doc:name="accountNumber" doc:id="3d263248-686d-44be-aa9c-6b6b4d9e8a7a" variableName="accountNumber"/>
+		<set-variable value="payload" doc:name="payload" doc:id="a4aca830-e384-465a-b54e-27d52f4d003a" variableName="payload"/>
+		<salesforce:query doc:name="Query" doc:id="fa2ea43d-647d-402c-aee6-2f4038dcf0bc" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id From Account where AccountNumber=':accountNumber']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"accountNumber" : vars.accountNumber
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="700e115f-4cb5-490a-8c81-79f860bfab00" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Id]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:delete doc:name="Delete" doc:id="48f1c7be-ee6f-4283-b7f8-ea816f6cc9f0" config-ref="Salesforce_Config" />
+		<ee:transform doc:name="Transform Message" doc:id="d503a70d-8cf3-480f-96db-d7cfd998f813">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "msg": "successful operation",
+  "code": 200,
+  "success": payload.items[0].payload.success ,
+  "eventId": payload.items[0].payload.id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+	<flow name="get:\updateDataOfEmployeeAndAddress:application\json:salesforceintegration-config">
+        <logger level="INFO" message="get:\updateDataOfEmployeeAndAddress:application\json:salesforceintegration-config" />
+		<set-variable value="#[attributes.queryParams.accountNumber]" doc:name="accountNumber" doc:id="f72b452a-71ff-4976-8838-93eb7d92e1eb" variableName="accountNumber" />
+		<set-variable value="#[payload]" doc:name="payload" doc:id="a492d1fe-4eef-48dd-a018-2658fd9908c5" variableName="payload"/>
+		<salesforce:query doc:name="Query" doc:id="1c20543a-2a42-4860-8781-282b9efa3ed1" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[SELECT Id FROM Account where AccountNumber=':accountNumber']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"accountNumber" : vars.accountNumber
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="71cb63ab-bb57-4454-b44b-6f46c147709d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[
+	{
+		Id: payload[0].Id,
+"Name" : vars.payload.Identification.FirstName ++ " " ++ vars.payload.Identification.LastName,
+ "BillingCity": vars.payload.Address.City[0],
+ "ShippingCity": vars.payload.Address.City[0],
+ "BillingState": vars.payload.Address.State[0],
+ "ShippingState": vars.payload.Address.State[0],
+ "BillingStreet": vars.payload.Address.street[0],
+ "ShippingStreet": vars.payload.Address.street[0],
+ "BillingPostalCode": vars.payload.Address.zipcode[0],
+ "ShippingPostalCode": vars.payload.Address.zipcode[0]
+
+	}
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:update type="Account" doc:name="Update" doc:id="ac31ded2-c689-4bc1-b506-9285b50ea560" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="ab57962d-5fde-4ed5-be7d-e0afcaad3d34" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "msg": "successful operation",
+  "code": 200,
+  "success": payload.items[0].payload.success ,
+  "eventId": payload.items[0].payload.id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+</mule>
